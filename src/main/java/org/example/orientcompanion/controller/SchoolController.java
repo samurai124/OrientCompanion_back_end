@@ -1,10 +1,11 @@
 package org.example.orientcompanion.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.orientcompanion.dto.SchoolRequest;
 import org.example.orientcompanion.dto.SchoolResponse;
-import org.example.orientcompanion.entity.School;
 import org.example.orientcompanion.service.SchoolService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,77 +14,56 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Public read endpoints (/api/schools) are accessible by all authenticated users.
- * Write endpoints (/api/admin/schools) are restricted to ADMIN role.
- */
+@Tag(name = "Schools", description = "Endpoints de consultation et de gestion des établissements scolaires / universités")
 @RestController
 @RequiredArgsConstructor
 public class SchoolController {
 
     private final SchoolService schoolService;
 
-    // ----------------------------------------------------------------
-    // Public / student-facing read endpoints
-    // ----------------------------------------------------------------
-
+    @Operation(summary = "Lister les écoles", description = "Rôles autorisés: STUDENT, COUNSELOR, ADMIN. Permet de filtrer par ID de filière associée.")
     @GetMapping("/api/schools")
+    @PreAuthorize("hasAnyRole('STUDENT', 'COUNSELOR', 'ADMIN')")
     public ResponseEntity<List<SchoolResponse>> findAll(
             @RequestParam(required = false) Long fieldId
     ) {
-        List<School> schools = fieldId != null
+        List<SchoolResponse> schools = fieldId != null
                 ? schoolService.findByFieldId(fieldId)
                 : schoolService.findAll();
 
-        return ResponseEntity.ok(schools.stream().map(this::toResponse).toList());
+        return ResponseEntity.ok(schools);
     }
 
+    @Operation(summary = "Consulter une école par ID", description = "Rôles autorisés: STUDENT, COUNSELOR, ADMIN.")
     @GetMapping("/api/schools/{id}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'COUNSELOR', 'ADMIN')")
     public ResponseEntity<SchoolResponse> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(toResponse(schoolService.findById(id)));
+        return ResponseEntity.ok(schoolService.findById(id));
     }
 
-    // ----------------------------------------------------------------
-    // Admin write endpoints
-    // ----------------------------------------------------------------
-
+    @Operation(summary = "Créer une école", description = "Rôle requis: ADMIN.")
     @PostMapping("/api/admin/schools")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SchoolResponse> create(@Valid @RequestBody SchoolRequest request) {
-        School school = schoolService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(school));
+        return ResponseEntity.status(HttpStatus.CREATED).body(schoolService.create(request));
     }
 
+    @Operation(summary = "Modifier une école", description = "Rôle requis: ADMIN.")
     @PutMapping("/api/admin/schools/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SchoolResponse> update(
             @PathVariable Long id,
             @Valid @RequestBody SchoolRequest request
     ) {
-        School school = schoolService.update(id, request);
-        return ResponseEntity.ok(toResponse(school));
+        return ResponseEntity.ok(schoolService.update(id, request));
     }
 
+    @Operation(summary = "Supprimer une école", description = "Rôle requis: ADMIN.")
     @DeleteMapping("/api/admin/schools/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         schoolService.delete(id);
         return ResponseEntity.noContent().build();
     }
-
-    // ----------------------------------------------------------------
-    // Inline mapper (no MapStruct needed for this simple conversion)
-    // ----------------------------------------------------------------
-
-    private SchoolResponse toResponse(School school) {
-        return SchoolResponse.builder()
-                .id(school.getId())
-                .name(school.getName())
-                .city(school.getCity())
-                .country(school.getCountry())
-                .type(school.getType())
-                .website(school.getWebsite())
-                .description(school.getDescription())
-                .build();
-    }
 }
+

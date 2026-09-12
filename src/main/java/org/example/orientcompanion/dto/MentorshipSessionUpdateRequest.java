@@ -18,6 +18,5 @@ public class MentorshipSessionUpdateRequest {
     @NotNull(message = "Le statut est obligatoire")
     private SessionStatus status;
 
-    /** Requis si status = SCHEDULED */
     private LocalDateTime scheduledAt;
 }

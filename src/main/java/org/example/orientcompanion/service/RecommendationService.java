@@ -2,38 +2,40 @@ package org.example.orientcompanion.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.orientcompanion.dto.RecommendationResponse;
+import org.example.orientcompanion.entity.Field;
+import org.example.orientcompanion.entity.Recommendation;
+import org.example.orientcompanion.entity.Student;
+import org.example.orientcompanion.exception.ResourceNotFoundException;
+import org.example.orientcompanion.mapper.RecommendationMapper;
+import org.example.orientcompanion.repository.FieldRepository;
+import org.example.orientcompanion.repository.RecommendationRepository;
+import org.example.orientcompanion.repository.StudentRepository;
 import org.example.orientcompanion.util.EmbeddingCodec;
 import org.example.orientcompanion.util.VectorUtils;
-import org.example.orientcompanion.entity.Field;
-import org.example.orientcompanion.repository.FieldRepository;
-import org.example.orientcompanion.entity.Recommendation;
-import org.example.orientcompanion.repository.RecommendationRepository;
-import org.example.orientcompanion.entity.Student;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * Orchestre le moteur de recommandation :
- * 1. Pour chaque filière du catalogue, calcule le score structuré (ScoringService).
- * 2. Calcule la similarité vectorielle si les deux embeddings sont disponibles.
- * 3. Fusionne les deux scores selon les poids configurés (mode dégradé si
- *    les embeddings sont absents : le score structuré compte alors à 100%).
- * 4. Génère l'explication via LlmExplanationService (avec son propre fallback).
- * 5. Remplace les anciennes recommandations de l'étudiant par les nouvelles.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@CacheConfig(cacheNames = "recommendations")
 public class RecommendationService {
 
     private final FieldRepository fieldRepository;
     private final RecommendationRepository recommendationRepository;
+    private final StudentRepository studentRepository;
     private final ScoringService scoringService;
     private final LlmExplanationService llmExplanationService;
+    private final RecommendationMapper recommendationMapper;
+    private final SchoolService schoolService;
 
     @Value("${scoring.fusion.structured:0.60}")
     private double structuredWeight;
@@ -41,12 +43,30 @@ public class RecommendationService {
     @Value("${scoring.fusion.vector:0.40}")
     private double vectorWeight;
 
+    @Cacheable(key = "#studentId")
+    @Transactional(readOnly = true)
+    public List<RecommendationResponse> getRecommendations(Long studentId) {
+        return recommendationRepository.findByStudentIdOrderByScoreDesc(studentId)
+                .stream()
+                .map(this::toEnrichedResponse)
+                .toList();
+    }
+
     @Transactional
-    public List<Recommendation> generateRecommendations(Student student) {
+    @CacheEvict(key = "#studentId")
+    public List<RecommendationResponse> generateRecommendations(Long studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Profil étudiant introuvable"));
+        return generateRecommendations(student);
+    }
+
+    @Transactional
+    @CacheEvict(key = "#student.id")
+    public List<RecommendationResponse> generateRecommendations(Student student) {
         List<Field> fields = fieldRepository.findAll();
 
         if (fields.isEmpty()) {
-            log.warn("Aucune filière dans le catalogue — impossible de générer des recommandations");
+            log.warn("Aucune filière disponible");
             return List.of();
         }
 
@@ -57,7 +77,18 @@ public class RecommendationService {
                 .sorted(Comparator.comparingDouble(Recommendation::getScore).reversed())
                 .toList();
 
-        return recommendationRepository.saveAll(recommendations);
+        List<Recommendation> saved = recommendationRepository.saveAll(recommendations);
+        return saved.stream()
+                .map(this::toEnrichedResponse)
+                .toList();
+    }
+
+    private RecommendationResponse toEnrichedResponse(Recommendation recommendation) {
+        RecommendationResponse response = recommendationMapper.toResponse(recommendation);
+        if (recommendation.getField() != null) {
+            response.setSchools(schoolService.findByFieldId(recommendation.getField().getId()));
+        }
+        return response;
     }
 
     private Recommendation buildRecommendation(Student student, Field field) {
@@ -79,13 +110,12 @@ public class RecommendationService {
         float[] fieldEmbedding = EmbeddingCodec.fromJson(field.getFieldEmbedding());
 
         if (studentEmbedding == null || fieldEmbedding == null) {
-            // Mode dégradé : pas d'embeddings disponibles, le score structuré compte seul
             return structuredScore;
         }
 
         double cosineSimilarity = VectorUtils.cosineSimilarity(studentEmbedding, fieldEmbedding);
-        double vectorScore = ((cosineSimilarity + 1) / 2) * 100; // normalise [-1,1] -> [0,100]
+        double vectorScore = ((cosineSimilarity + 1) / 2) * 100;
 
         return (structuredScore * structuredWeight) + (vectorScore * vectorWeight);
     }
-}
+}

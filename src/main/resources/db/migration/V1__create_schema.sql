@@ -1,8 +1,4 @@
-﻿-- ============================================================
--- V1 - Full schema creation (consolidated)
--- ============================================================
-
--- 1. users (root of the JOINED inheritance hierarchy)
+﻿
 CREATE TABLE IF NOT EXISTS users (
     id            BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_type     VARCHAR(20)  NOT NULL,
@@ -15,7 +11,6 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE INDEX idx_users_user_type ON users (user_type);
 
--- 2. students (JOINED sub-table)
 CREATE TABLE IF NOT EXISTS students (
     id                      BIGINT PRIMARY KEY,
     interests_json          TEXT,
@@ -26,13 +21,11 @@ CREATE TABLE IF NOT EXISTS students (
     CONSTRAINT fk_students_user FOREIGN KEY (id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
--- 3. admins (JOINED sub-table)
 CREATE TABLE IF NOT EXISTS admins (
     id BIGINT PRIMARY KEY,
     CONSTRAINT fk_admins_user FOREIGN KEY (id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
--- 4. fields (needed before counselors)
 CREATE TABLE IF NOT EXISTS fields (
     id                   BIGINT AUTO_INCREMENT PRIMARY KEY,
     name                 VARCHAR(255) NOT NULL,
@@ -45,7 +38,6 @@ CREATE TABLE IF NOT EXISTS fields (
 
 CREATE INDEX idx_fields_category ON fields (category);
 
--- 5. counselors (JOINED sub-table, FK to fields)
 CREATE TABLE IF NOT EXISTS counselors (
     id                 BIGINT PRIMARY KEY,
     bio                TEXT,
@@ -54,7 +46,6 @@ CREATE TABLE IF NOT EXISTS counselors (
     CONSTRAINT fk_counselors_specialty_field FOREIGN KEY (specialty_field_id) REFERENCES fields (id) ON DELETE SET NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
--- 6. recommendations
 CREATE TABLE IF NOT EXISTS recommendations (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
     student_id  BIGINT   NOT NULL,
@@ -69,7 +60,6 @@ CREATE TABLE IF NOT EXISTS recommendations (
 CREATE INDEX idx_recommendations_student ON recommendations (student_id);
 CREATE INDEX idx_recommendations_score   ON recommendations (score DESC);
 
--- 7. mentorship_sessions
 CREATE TABLE IF NOT EXISTS mentorship_sessions (
     id           BIGINT AUTO_INCREMENT PRIMARY KEY,
     student_id   BIGINT      NOT NULL,

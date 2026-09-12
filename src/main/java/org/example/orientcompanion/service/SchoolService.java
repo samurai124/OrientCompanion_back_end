@@ -2,11 +2,17 @@ package org.example.orientcompanion.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.orientcompanion.dto.SchoolRequest;
+import org.example.orientcompanion.dto.SchoolResponse;
 import org.example.orientcompanion.entity.Field;
 import org.example.orientcompanion.entity.School;
 import org.example.orientcompanion.exception.ResourceNotFoundException;
+import org.example.orientcompanion.mapper.SchoolMapper;
 import org.example.orientcompanion.repository.FieldRepository;
 import org.example.orientcompanion.repository.SchoolRepository;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,26 +20,40 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@CacheConfig(cacheNames = "schools")
 public class SchoolService {
 
     private final SchoolRepository schoolRepository;
     private final FieldRepository fieldRepository;
+    private final SchoolMapper schoolMapper;
 
-    public List<School> findAll() {
-        return schoolRepository.findAll();
+    @Cacheable(key = "'all'")
+    public List<SchoolResponse> findAll() {
+        return schoolRepository.findAll()
+                .stream()
+                .map(schoolMapper::toResponse)
+                .toList();
     }
 
-    public List<School> findByFieldId(Long fieldId) {
-        return schoolRepository.findByFieldId(fieldId);
+    @Cacheable(key = "'field:' + #fieldId")
+    public List<SchoolResponse> findByFieldId(Long fieldId) {
+        return schoolRepository.findByFieldId(fieldId)
+                .stream()
+                .map(schoolMapper::toResponse)
+                .toList();
     }
 
-    public School findById(Long id) {
-        return schoolRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("École introuvable avec l'id : " + id));
+    @Cacheable(key = "#id")
+    public SchoolResponse findById(Long id) {
+        return schoolMapper.toResponse(
+                schoolRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("École introuvable avec l'id : " + id))
+        );
     }
 
     @Transactional
-    public School create(SchoolRequest request) {
+    @CacheEvict(key = "'all'", allEntries = true)
+    public SchoolResponse create(SchoolRequest request) {
         Field field = fieldRepository.findById(request.getFieldId())
                 .orElseThrow(() -> new ResourceNotFoundException("Filière introuvable avec l'id : " + request.getFieldId()));
 
@@ -47,29 +67,31 @@ public class SchoolService {
                 .field(field)
                 .build();
 
-        return schoolRepository.save(school);
+        return schoolMapper.toResponse(schoolRepository.save(school));
     }
 
     @Transactional
-    public School update(Long id, SchoolRequest request) {
-        School school = findById(id);
+    @CachePut(key = "#id")
+    @CacheEvict(allEntries = true)
+    public SchoolResponse update(Long id, SchoolRequest request) {
+        School school = schoolRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("École introuvable avec l'id : " + id));
+
         Field field = fieldRepository.findById(request.getFieldId())
                 .orElseThrow(() -> new ResourceNotFoundException("Filière introuvable avec l'id : " + request.getFieldId()));
 
-        school.setName(request.getName());
-        school.setCity(request.getCity());
-        school.setCountry(request.getCountry());
-        school.setType(request.getType());
-        school.setWebsite(request.getWebsite());
-        school.setDescription(request.getDescription());
+        schoolMapper.updateFromRequest(request, school);
         school.setField(field);
 
-        return schoolRepository.save(school);
+        return schoolMapper.toResponse(schoolRepository.save(school));
     }
 
     @Transactional
+    @CacheEvict(allEntries = true)
     public void delete(Long id) {
-        School school = findById(id);
-        schoolRepository.delete(school);
+        if (!schoolRepository.existsById(id)) {
+            throw new ResourceNotFoundException("École introuvable avec l'id : " + id);
+        }
+        schoolRepository.deleteById(id);
     }
 }

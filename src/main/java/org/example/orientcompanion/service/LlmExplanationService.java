@@ -5,45 +5,38 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.orientcompanion.entity.Field;
 import org.example.orientcompanion.entity.Student;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.List;
 
-/**
- * Génère l'explication en langage naturel d'une recommandation via un appel LLM.
- *
- * Suppose une API compatible "chat completions" (format OpenAI-like, supporté
- * par la plupart des fournisseurs à coût maîtrisé : Groq, Mistral, OpenAI...).
- *
- * En cas d'échec (timeout, erreur réseau, réponse invalide), bascule sur une
- * explication générée à partir du seul scoring structuré (mode dégradé,
- * cf. cahier des charges section 8 - Fiabilité).
- */
 @Slf4j
 @Service
+@CacheConfig(cacheNames = "llm_explanations")
 public class LlmExplanationService {
 
     private final WebClient webClient;
 
-    @Value("${llm.api-url}")
+    @Value("${gemini.api.key}")
+    private String apiKey;
+
+    @Value("${gemini.api.url}")
     private String apiUrl;
 
-    @Value("${llm.api-key}")
-    private String apiKey;
+    @Value("${gemini.api.model}")
+    private String model;
 
     @Value("${llm.timeout-ms:8000}")
     private long timeoutMs;
-
-    @Value("${llm.model:gpt-4o-mini}")
-    private String model;
 
     public LlmExplanationService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.build();
     }
 
+    @Cacheable(key = "#student.id + ':' + #field.id + ':' + T(Math).round(#score)")
     public String generateExplanation(Student student, Field field, double score) {
         if (apiUrl == null || apiUrl.isBlank()) {
             log.warn("LLM non configuré (llm.api-url vide) — utilisation du mode dégradé");
@@ -51,8 +44,7 @@ public class LlmExplanationService {
         }
 
         try {
-            String prompt = buildPrompt(student, field, score);
-            return callLlm(prompt);
+            return callLlm(buildPrompt(student, field, score));
         } catch (Exception e) {
             log.error("Échec de l'appel LLM, bascule en mode dégradé :", e);
             return fallbackExplanation(field, score);
@@ -71,8 +63,9 @@ public class LlmExplanationService {
                 )
         );
 
+        String endpoint = resolveChatUrl();
         ChatResponse response = webClient.post()
-                .uri(apiUrl)
+                .uri(endpoint)
                 .header("Authorization", "Bearer " + apiKey)
                 .bodyValue(request)
                 .retrieve()
@@ -103,19 +96,10 @@ public class LlmExplanationService {
         );
     }
 
-    /**
-     * Mode dégradé : explication générée uniquement à partir du score structuré,
-     * sans appel externe. Toujours disponible, jamais d'échec possible.
-     */
     private String fallbackExplanation(Field field, double score) {
-        String niveau;
-        if (score >= 75) {
-            niveau = "une très bonne correspondance";
-        } else if (score >= 50) {
-            niveau = "une correspondance modérée";
-        } else {
-            niveau = "une correspondance limitée";
-        }
+        String niveau = score >= 75 ? "une très bonne correspondance"
+                : score >= 50 ? "une correspondance modérée"
+                  : "une correspondance limitée";
 
         return "La filière \"%s\" présente %s avec votre profil, avec un score de %.1f/100 "
                 .formatted(field.getName(), niveau, score)
@@ -123,19 +107,24 @@ public class LlmExplanationService {
                 + "Nous vous recommandons d'échanger avec un conseiller pour approfondir cette piste.";
     }
 
-    // --- DTOs internes pour l'appel API (format chat completions) ---
-
-    private record ChatRequest(String model, List<ChatMessage> messages) {
+    private String resolveChatUrl() {
+        if (apiUrl == null || apiUrl.isBlank()) {
+            return null;
+        }
+        String cleanUrl = apiUrl.trim();
+        if (cleanUrl.endsWith("/chat/completions")) {
+            return cleanUrl;
+        }
+        return cleanUrl.endsWith("/") ? cleanUrl + "chat/completions" : cleanUrl + "/chat/completions";
     }
 
-    private record ChatMessage(String role, String content) {
-    }
+    private record ChatRequest(String model, List<ChatMessage> messages) {}
+
+    private record ChatMessage(String role, String content) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private record ChatResponse(List<Choice> choices) {
-    }
+    private record ChatResponse(List<Choice> choices) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private record Choice(ChatMessage message) {
-    }
+    private record Choice(ChatMessage message) {}
 }

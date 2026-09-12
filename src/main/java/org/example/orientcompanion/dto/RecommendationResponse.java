@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RecommendationResponse {
+public class RecommendationResponse implements Serializable {
 
     private Long id;
     private Long fieldId;
@@ -24,6 +25,5 @@ public class RecommendationResponse {
     private String explanation;
     private LocalDateTime createdAt;
 
-    /** Schools that offer this recommended field. */
     private List<SchoolResponse> schools;
 }

@@ -4,13 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.orientcompanion.dto.AssessmentRequest;
 import org.example.orientcompanion.dto.StudentProfileResponse;
-import org.example.orientcompanion.repository.StudentRepository;
+import org.example.orientcompanion.entity.Student;
 import org.example.orientcompanion.exception.ResourceNotFoundException;
+import org.example.orientcompanion.repository.StudentRepository;
 import org.example.orientcompanion.util.EmbeddingCodec;
 import org.example.orientcompanion.util.JsonMapCodec;
-import org.example.orientcompanion.service.EmbeddingService;
-import org.example.orientcompanion.service.RecommendationService;
-import org.example.orientcompanion.entity.Student;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,19 +21,15 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@CacheConfig(cacheNames = "student_profiles")
 public class AssessmentService {
 
     private final StudentRepository studentRepository;
     private final EmbeddingService embeddingService;
     private final RecommendationService recommendationService;
 
-    /**
-     * Enregistre le bilan, calcule l'embedding du profil, puis déclenche
-     * immédiatement la génération des recommandations. Si l'étudiant repasse
-     * le bilan, ses anciennes recommandations sont remplacées (géré par
-     * RecommendationService).
-     */
     @Transactional
+    @CacheEvict(key = "#studentId")
     public StudentProfileResponse submitAssessment(Long studentId, AssessmentRequest request) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Profil étudiant introuvable"));
@@ -50,12 +47,12 @@ public class AssessmentService {
         }
 
         student = studentRepository.save(student);
-
         recommendationService.generateRecommendations(student);
 
         return toResponse(student);
     }
 
+    @Cacheable(key = "#studentId")
     public StudentProfileResponse getProfile(Long studentId) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Profil étudiant introuvable"));
@@ -63,11 +60,6 @@ public class AssessmentService {
         return toResponse(student);
     }
 
-    /**
-     * Construit un texte descriptif du profil, utilisé comme entrée pour
-     * l'API d'embeddings (les intérêts et la personnalité pèsent le plus
-     * dans la représentation vectorielle du profil).
-     */
     private String buildProfileText(AssessmentRequest request) {
         String interestsText = request.getInterests().entrySet().stream()
                 .map(e -> e.getKey() + " (" + e.getValue() + ")")

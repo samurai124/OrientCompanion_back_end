@@ -5,11 +5,6 @@ public final class VectorUtils {
     private VectorUtils() {
     }
 
-    /**
-     * Calcule la similarité cosinus entre deux vecteurs.
-     * Retourne une valeur entre -1 et 1 (généralement entre 0 et 1
-     * pour des embeddings de texte), où 1 signifie une similarité parfaite.
-     */
     public static double cosineSimilarity(float[] a, float[] b) {
         if (a == null || b == null || a.length != b.length || a.length == 0) {
             throw new IllegalArgumentException("Les vecteurs doivent être non nuls et de même dimension");

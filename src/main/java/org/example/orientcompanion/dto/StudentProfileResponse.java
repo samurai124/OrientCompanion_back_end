@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StudentProfileResponse {
+public class StudentProfileResponse implements Serializable {
 
     private Long id;
     private Map<String, Double> interests;

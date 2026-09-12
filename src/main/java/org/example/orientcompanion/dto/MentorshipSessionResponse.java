@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.orientcompanion.enums.SessionStatus;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Getter
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MentorshipSessionResponse {
+public class MentorshipSessionResponse implements Serializable {
 
     private Long id;
     private Long studentId;

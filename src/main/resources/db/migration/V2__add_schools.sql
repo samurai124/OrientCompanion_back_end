@@ -1,6 +1,3 @@
--- ============================================================
--- V2 - Add schools table
--- ============================================================
 
 CREATE TABLE IF NOT EXISTS schools (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,

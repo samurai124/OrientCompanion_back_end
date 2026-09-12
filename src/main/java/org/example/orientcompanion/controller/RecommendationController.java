@@ -1,16 +1,10 @@
 package org.example.orientcompanion.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.orientcompanion.dto.RecommendationResponse;
-import org.example.orientcompanion.dto.SchoolResponse;
-import org.example.orientcompanion.entity.Recommendation;
-import org.example.orientcompanion.entity.Student;
 import org.example.orientcompanion.entity.User;
-import org.example.orientcompanion.exception.ResourceNotFoundException;
-import org.example.orientcompanion.mapper.RecommendationMapper;
-import org.example.orientcompanion.repository.RecommendationRepository;
-import org.example.orientcompanion.repository.SchoolRepository;
-import org.example.orientcompanion.repository.StudentRepository;
 import org.example.orientcompanion.service.RecommendationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,67 +16,28 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name = "Recommendations", description = "Endpoints des recommandations d'orientation pour étudiants (ROLE_STUDENT)")
 @RestController
 @RequestMapping("/api/student/recommendations")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('STUDENT')")
+@PreAuthorize("hasAnyRole('STUDENT','ADMIN')")
 public class RecommendationController {
 
-    private final RecommendationRepository recommendationRepository;
     private final RecommendationService recommendationService;
-    private final StudentRepository studentRepository;
-    private final RecommendationMapper recommendationMapper;
-    private final SchoolRepository schoolRepository;
 
+    @Operation(summary = "Obtenir mes recommandations", description = "Rôles autorisés: STUDENT, ADMIN. Récupère la liste des filières recommandées classées par score avec explications et écoles associées.")
     @GetMapping
+    @PreAuthorize("hasAnyRole('STUDENT','ADMIN')")
     public ResponseEntity<List<RecommendationResponse>> getMyRecommendations(
             @AuthenticationPrincipal User principal
     ) {
-        List<Recommendation> recommendations =
-                recommendationRepository.findByStudentIdOrderByScoreDesc(principal.getId());
-
-        return ResponseEntity.ok(recommendations.stream().map(this::toEnrichedResponse).toList());
+        return ResponseEntity.ok(recommendationService.getRecommendations(principal.getId()));
     }
 
-    /**
-     * Régénère les recommandations sans repasser le bilan complet — utile
-     * si le catalogue de filières a été mis à jour depuis la dernière
-     * génération.
-     */
+    @Operation(summary = "Régénérer les recommandations", description = "Rôles autorisés: STUDENT, ADMIN. Relance le calcul des scores et explications basé sur le profil actuel de l'étudiant.")
     @PostMapping("/regenerate")
+    @PreAuthorize("hasAnyRole('STUDENT','ADMIN')")
     public ResponseEntity<List<RecommendationResponse>> regenerate(@AuthenticationPrincipal User principal) {
-        Student student = studentRepository.findById(principal.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Profil étudiant introuvable"));
-
-        List<Recommendation> recommendations = recommendationService.generateRecommendations(student);
-
-        return ResponseEntity.ok(recommendations.stream().map(this::toEnrichedResponse).toList());
+        return ResponseEntity.ok(recommendationService.generateRecommendations(principal.getId()));
     }
-
-    /**
-     * Maps a Recommendation to its DTO and populates the list of schools
-     * that offer the recommended field.
-     */
-    private RecommendationResponse toEnrichedResponse(Recommendation recommendation) {
-        RecommendationResponse response = recommendationMapper.toResponse(recommendation);
-
-        if (recommendation.getField() != null) {
-            List<SchoolResponse> schools = schoolRepository
-                    .findByFieldId(recommendation.getField().getId())
-                    .stream()
-                    .map(school -> SchoolResponse.builder()
-                            .id(school.getId())
-                            .name(school.getName())
-                            .city(school.getCity())
-                            .country(school.getCountry())
-                            .type(school.getType())
-                            .website(school.getWebsite())
-                            .description(school.getDescription())
-                            .build())
-                    .toList();
-            response.setSchools(schools);
-        }
-
-        return response;
-    }
-}
+}

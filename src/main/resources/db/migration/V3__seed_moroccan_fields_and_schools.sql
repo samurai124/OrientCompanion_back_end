@@ -1,10 +1,4 @@
--- ============================================================
--- V3 - Seed: Moroccan fields & schools catalogue
--- ============================================================
 
--- ============================================================
--- 1. FIELDS (filières)
--- ============================================================
 
 INSERT INTO fields (id, name, description, required_traits_json, category, related_subjects) VALUES
 
@@ -126,13 +120,10 @@ INSERT INTO fields (id, name, description, required_traits_json, category, relat
      'Agronomie et Environnement', 'Biologie,Chimie,Géographie,Sciences de la Terre');
 
 
--- ============================================================
--- 2. SCHOOLS (établissements marocains)
--- ============================================================
+
 
 INSERT INTO schools (name, city, country, type, website, description, field_id) VALUES
 
--- ── GÉNIE LOGICIEL (field_id = 1) ──────────────────────────
 ('ENSIAS - École Nationale Supérieure d''Informatique et d''Analyse des Systèmes',
  'Rabat', 'Maroc', 'Grande École Publique',
  'https://ensias.um5.ac.ma',
@@ -163,7 +154,6 @@ INSERT INTO schools (name, city, country, type, website, description, field_id) 
  'Master et Licence en Génie Logiciel, systèmes distribués et développement web.',
  1),
 
--- ── GÉNIE INFORMATIQUE (field_id = 2) ───────────────────────
 ('INPT - Institut National des Postes et Télécommunications',
  'Rabat', 'Maroc', 'Grande École Publique',
  'https://www.inpt.ac.ma',
@@ -188,7 +178,7 @@ INSERT INTO schools (name, city, country, type, website, description, field_id) 
  'Cycle ingénieur en informatique et réseaux, accrédité par l''État.',
  2),
 
--- ── GÉNIE CIVIL (field_id = 3) ───────────────────────────────
+
 ('EHTP - École Hassania des Travaux Publics',
  'Casablanca', 'Maroc', 'Grande École Publique',
  'https://www.ehtp.ac.ma',
@@ -213,7 +203,7 @@ INSERT INTO schools (name, city, country, type, website, description, field_id) 
  'Licence et Master en Sciences et Techniques du Génie Civil.',
  3),
 
--- ── GÉNIE ÉLECTRIQUE (field_id = 4) ──────────────────────────
+
 ('ENIM - École Nationale de l''Industrie Minérale',
  'Rabat', 'Maroc', 'Grande École Publique',
  'https://www.enim.ac.ma',
@@ -232,7 +222,6 @@ INSERT INTO schools (name, city, country, type, website, description, field_id) 
  'Formation d''ingénieurs en électrotechnique, automatique et génie énergétique.',
  4),
 
--- ── INTELLIGENCE ARTIFICIELLE & DATA SCIENCE (field_id = 5) ──
 ('ENSIAS - École Nationale Supérieure d''Informatique et d''Analyse des Systèmes',
  'Rabat', 'Maroc', 'Grande École Publique',
  'https://ensias.um5.ac.ma',
@@ -251,7 +240,7 @@ INSERT INTO schools (name, city, country, type, website, description, field_id) 
  'Spécialisation en management de l''information, data analytics et systèmes décisionnels.',
  5),
 
--- ── CYBERSÉCURITÉ (field_id = 6) ─────────────────────────────
+
 ('INPT - Institut National des Postes et Télécommunications',
  'Rabat', 'Maroc', 'Grande École Publique',
  'https://www.inpt.ac.ma',
@@ -264,7 +253,7 @@ INSERT INTO schools (name, city, country, type, website, description, field_id) 
  'Cycle ingénieur Sécurité des Systèmes d''Information et Cloud Computing.',
  6),
 
--- ── TÉLÉCOMMUNICATIONS (field_id = 7) ────────────────────────
+
 ('INPT - Institut National des Postes et Télécommunications',
  'Rabat', 'Maroc', 'Grande École Publique',
  'https://www.inpt.ac.ma',
@@ -277,7 +266,7 @@ INSERT INTO schools (name, city, country, type, website, description, field_id) 
  'Filière Télécommunications et Réseaux Informatiques.',
  7),
 
--- ── MÉDECINE GÉNÉRALE (field_id = 8) ─────────────────────────
+
 ('Faculté de Médecine et de Pharmacie de Rabat',
  'Rabat', 'Maroc', 'Faculté Publique',
  'https://fmp.um5.ac.ma',
@@ -308,7 +297,7 @@ INSERT INTO schools (name, city, country, type, website, description, field_id) 
  'Médecine générale et spécialités médicales à l''Université Mohammed Premier.',
  8),
 
--- ── PHARMACIE (field_id = 9) ──────────────────────────────────
+
 ('Faculté de Médecine et de Pharmacie de Rabat',
  'Rabat', 'Maroc', 'Faculté Publique',
  'https://fmp.um5.ac.ma',
@@ -327,7 +316,7 @@ INSERT INTO schools (name, city, country, type, website, description, field_id) 
  'Filière pharmacie avec orientation vers la pharmacologie et biologie médicale.',
  9),
 
--- ── MÉDECINE DENTAIRE (field_id = 10) ────────────────────────
+
 ('Centre Hospitalier Universitaire de Rabat - Faculté de Médecine Dentaire',
  'Rabat', 'Maroc', 'Faculté Publique',
  'https://fmd.um5.ac.ma',
@@ -340,7 +329,7 @@ INSERT INTO schools (name, city, country, type, website, description, field_id) 
  'Chirurgie dentaire, prothèses et parodontologie avec plateau clinique moderne.',
  10),
 
--- ── SCIENCES INFIRMIÈRES (field_id = 11) ─────────────────────
+
 ('Institut National de Formation aux Professions de Santé (INFPS)',
  'Casablanca', 'Maroc', 'Institut Public',
  'https://www.infps.ma',
@@ -353,7 +342,7 @@ INSERT INTO schools (name, city, country, type, website, description, field_id) 
  'Réseau national d''instituts formant les infirmiers et professionnels paramédicaux.',
  11),
 
--- ── COMMERCE & GESTION (field_id = 12) ───────────────────────
+
 ('ISCAE - Institut Supérieur de Commerce et d''Administration des Entreprises',
  'Casablanca', 'Maroc', 'Grande École Publique',
  'https://www.iscae.ac.ma',
@@ -384,7 +373,7 @@ INSERT INTO schools (name, city, country, type, website, description, field_id) 
  'Formation en gestion, commerce et systèmes d''information.',
  12),
 
--- ── FINANCE & COMPTABILITÉ (field_id = 13) ────────────────────
+
 ('ISCAE - Institut Supérieur de Commerce et d''Administration des Entreprises',
  'Casablanca', 'Maroc', 'Grande École Publique',
  'https://www.iscae.ac.ma',
@@ -403,7 +392,7 @@ INSERT INTO schools (name, city, country, type, website, description, field_id) 
  'DUT Finance Comptabilité et Techniques de Commercialisation.',
  13),
 
--- ── MARKETING & COMMUNICATION (field_id = 14) ────────────────
+
 ('HEM - Hautes Études de Management',
  'Rabat', 'Maroc', 'École Privée',
  'https://www.hem.ac.ma',

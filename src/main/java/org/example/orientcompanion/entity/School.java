@@ -15,11 +15,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Représente un établissement scolaire / université pouvant offrir une filière.
- * Une école est liée à une filière spécifique (relation Many-to-One) afin qu'elle
- * apparaisse automatiquement dans les recommandations lorsque la filière est recommandée.
- */
 @Entity
 @Table(name = "schools")
 @Getter
@@ -42,7 +37,6 @@ public class School {
     @Column
     private String country;
 
-    /** Type : "Université", "Grande École", "École Privée", "BTS/IUT", etc. */
     @Column
     private String type;
 
