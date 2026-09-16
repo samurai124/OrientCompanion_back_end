@@ -3,6 +3,7 @@ package org.example.orientcompanion.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.example.orientcompanion.entity.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -25,16 +26,37 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Génère un JWT avec les claims standard + le claim "role".
+     *
+     * Le claim "role" contient la valeur brute de l'enum (ex: "STUDENT"),
+     * ce qui permet au frontend de lire directement decoded.role sans
+     * avoir besoin de la réponse HTTP body pour connaître le rôle.
+     */
     public String generateToken(UserDetails userDetails) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationMs);
 
-        return Jwts.builder()
+        // Extraire le rôle si l'utilisateur est une instance de notre entité User
+        String role = null;
+        if (userDetails instanceof User appUser) {
+            role = appUser.getRole().name(); // "STUDENT" | "COUNSELOR" | "ADMIN"
+        } else if (!userDetails.getAuthorities().isEmpty()) {
+            // Fallback : lire la première authority et retirer le préfixe ROLE_
+            String authority = userDetails.getAuthorities().iterator().next().getAuthority();
+            role = authority.startsWith("ROLE_") ? authority.substring(5) : authority;
+        }
+
+        var builder = Jwts.builder()
                 .subject(userDetails.getUsername())
                 .issuedAt(now)
-                .expiration(expiry)
-                .signWith(getSigningKey())
-                .compact();
+                .expiration(expiry);
+
+        if (role != null) {
+            builder.claim("role", role);
+        }
+
+        return builder.signWith(getSigningKey()).compact();
     }
 
     public String extractEmail(String token) {
