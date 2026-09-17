@@ -12,4 +12,6 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
     List<School> findByFieldId(Long fieldId);
 
     List<School> findByNameContainingIgnoreCase(String name);
+
+    long countAllByType(String type);
 }
