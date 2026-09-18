@@ -20,9 +20,12 @@ public class MentorshipSessionResponse implements Serializable {
     private Long id;
     private Long studentId;
     private String studentName;
+    private String studentEmail;
     private Long counselorId;
     private String counselorName;
+    private String counselorEmail;
     private SessionStatus status;
     private LocalDateTime scheduledAt;
+    private String meetLink;
     private LocalDateTime createdAt;
 }

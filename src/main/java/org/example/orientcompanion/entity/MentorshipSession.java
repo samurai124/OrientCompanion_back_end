@@ -52,6 +52,9 @@ public class MentorshipSession {
     @Column(name = "scheduled_at")
     private LocalDateTime scheduledAt;
 
+    @Column(name = "meet_link", length = 500)
+    private String meetLink;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

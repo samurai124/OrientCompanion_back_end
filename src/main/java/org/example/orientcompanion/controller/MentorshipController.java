@@ -8,6 +8,7 @@ import org.example.orientcompanion.dto.CounselorProfileResponse;
 import org.example.orientcompanion.dto.MentorshipSessionRequest;
 import org.example.orientcompanion.dto.MentorshipSessionResponse;
 import org.example.orientcompanion.dto.MentorshipSessionUpdateRequest;
+import org.example.orientcompanion.dto.StudentSummaryDTO;
 import org.example.orientcompanion.entity.User;
 import org.example.orientcompanion.service.MentorshipService;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Mentorship", description = "Endpoints de gestion du mentorat (Étudiants et Conseillers)")
 @RestController
@@ -54,6 +56,13 @@ public class MentorshipController {
         return ResponseEntity.ok(mentorshipService.findByStudent(principal.getId()));
     }
 
+    @Operation(summary = "Consulter le profil du conseiller connecté", description = "Rôle requis: COUNSELOR. Récupère le profil et statistiques du conseiller.")
+    @GetMapping("/api/counselor/profile")
+    @PreAuthorize("hasAnyRole('COUNSELOR','ADMIN')")
+    public ResponseEntity<CounselorProfileResponse> getMyProfile(@AuthenticationPrincipal User principal) {
+        return ResponseEntity.ok(mentorshipService.getCounselorProfile(principal.getId()));
+    }
+
     @Operation(summary = "Consulter mes séances en tant que conseiller", description = "Rôle requis: COUNSELOR. Récupère les séances assignées.")
     @GetMapping("/api/counselor/mentorship/sessions")
     @PreAuthorize("hasAnyRole('COUNSELOR','ADMIN')")
@@ -63,7 +72,7 @@ public class MentorshipController {
         return ResponseEntity.ok(mentorshipService.findByCounselor(principal.getId()));
     }
 
-    @Operation(summary = "Mettre à jour le statut ou planifier une séance", description = "Rôle requis: COUNSELOR. Permet d'accepter, refuser ou planifier une séance.")
+    @Operation(summary = "Mettre à jour le statut, date ou lien Meet d'une séance", description = "Rôle requis: COUNSELOR. Permet de planifier la séance (date et lien Google Meet).")
     @PatchMapping("/api/counselor/mentorship/sessions/{id}")
     @PreAuthorize("hasAnyRole('COUNSELOR','ADMIN')")
     public ResponseEntity<MentorshipSessionResponse> updateSession(
@@ -73,4 +82,25 @@ public class MentorshipController {
     ) {
         return ResponseEntity.ok(mentorshipService.updateStatus(id, principal.getId(), request));
     }
-}
+
+    @Operation(summary = "Lister les étudiants suivis par le conseiller")
+    @GetMapping("/api/counselor/students")
+    @PreAuthorize("hasAnyRole('COUNSELOR','ADMIN')")
+    public ResponseEntity<List<StudentSummaryDTO>> getMyStudents(@AuthenticationPrincipal User principal) {
+        return ResponseEntity.ok(mentorshipService.findStudentsByCounselor(principal.getId()));
+    }
+
+    @Operation(summary = "Lister les bilans RIASEC à examiner")
+    @GetMapping("/api/counselor/assessments/pending")
+    @PreAuthorize("hasAnyRole('COUNSELOR','ADMIN')")
+    public ResponseEntity<List<Object>> getPendingAssessments(@AuthenticationPrincipal User principal) {
+        return ResponseEntity.ok(List.of());
+    }
+
+    @Operation(summary = "Soumettre l'avis du conseiller sur un bilan")
+    @PostMapping("/api/counselor/assessments/{id}/review")
+    @PreAuthorize("hasAnyRole('COUNSELOR','ADMIN')")
+    public ResponseEntity<Void> submitReview(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        return ResponseEntity.ok().build();
+    }
+}

@@ -1,6 +1,5 @@
 package org.example.orientcompanion.dto;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,8 +14,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class MentorshipSessionUpdateRequest {
 
-    @NotNull(message = "Le statut est obligatoire")
     private SessionStatus status;
 
     private LocalDateTime scheduledAt;
+
+    private String meetLink;
 }
