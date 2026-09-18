@@ -10,6 +10,8 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface SchoolMapper {
 
+    @Mapping(target = "fieldId", source = "field.id")
+    @Mapping(target = "fieldName", source = "field.name")
     SchoolResponse toResponse(School school);
 
     @Mapping(target = "id", ignore = true)

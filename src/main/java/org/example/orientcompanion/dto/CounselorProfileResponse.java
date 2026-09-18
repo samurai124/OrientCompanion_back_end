@@ -21,4 +21,9 @@ public class CounselorProfileResponse implements Serializable {
     private String bio;
     private Long specialtyFieldId;
     private String specialtyFieldName;
+
+    private long activeStudentsCount;
+    private long upcomingSessionsCount;
+    private long completedSessionsCount;
+    private String averageRating;
 }

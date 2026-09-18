@@ -22,4 +22,6 @@ public class SchoolResponse implements Serializable {
     private String type;
     private String website;
     private String description;
+    private Long fieldId;
+    private String fieldName;
 }
