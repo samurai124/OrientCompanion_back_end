@@ -141,7 +141,7 @@ class RecommendationServiceTest {
     @Test
     @DisplayName("Should fall back to structured score when embeddings are missing")
     void generateRecommendations_WhenEmbeddingsAreNull_ShouldUseOnlyStructuredScore() {
-        student.setProfileEmbedding(null); // Embedding absent
+        student.setProfileEmbedding(null);
         List<Field> fields = List.of(fieldInfo);
 
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
