@@ -41,7 +41,6 @@ public class UserService {
 
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         User user = createUserInstance(request);
-
         user.setEmail(request.getEmail());
         user.setPasswordHash(encodedPassword);
         user.setFullName(request.getFullName());
@@ -88,4 +87,6 @@ public class UserService {
             case ADMIN -> new Admin();
         };
     }
+
+
 }
