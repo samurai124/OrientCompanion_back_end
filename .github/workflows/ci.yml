@@ -30,8 +30,8 @@ jobs:
       - name: Make Maven wrapper executable
         run: chmod +x ./mvnw
 
-      - name: Run tests with Maven
-        run: ./mvnw test -B
+      - name: Build, Test & Package with Maven
+        run: ./mvnw clean verify -B
 
       - name: Upload Test Reports
         if: always()
@@ -41,14 +41,11 @@ jobs:
           path: target/surefire-reports/
           if-no-files-found: ignore
 
-      - name: Package JAR (skip tests)
-        run: ./mvnw package -DskipTests -B
-
       - name: Upload Application JAR
         uses: actions/upload-artifact@v4
         with:
           name: orientcompanion-jar
-          path: target/*.jar
+          path: target/OrientCompanion-*.jar
           if-no-files-found: error
 
   docker-build:
