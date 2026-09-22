@@ -11,7 +11,6 @@
 -- =============================================================================
 INSERT INTO users (user_type, email, password_hash, full_name, created_at, enabled) VALUES
 ('ADMIN', 'admin@orientcompanion.ma', '$2a$12$mQmMG8YqA2E.VK8eMHW2f.xJZNuPqH3G1v0z9OeQiDWPblkBtyW.2', 'Hamza El Adminsi', '2025-09-01 08:00:00', 1);
-
 INSERT INTO admins (id) VALUES (LAST_INSERT_ID());
 
 
@@ -217,39 +216,38 @@ SELECT
     ms.scheduled_at,
     ms.created_at
 FROM (
-    VALUES
     -- (student_email, counselor_email, status, scheduled_at, created_at)
-    ROW('amine.benali@student.ma',      'youssef.amrani@orientcompanion.ma',  'COMPLETED',  '2026-02-05 10:00:00', '2026-01-25 08:00:00'),
-    ROW('amine.benali@student.ma',      'karim.fassi@orientcompanion.ma',     'COMPLETED',  '2026-03-10 14:00:00', '2026-03-01 09:00:00'),
-    ROW('amine.benali@student.ma',      'youssef.amrani@orientcompanion.ma',  'SCHEDULED',  '2026-10-15 09:00:00', '2026-09-10 10:00:00'),
-    ROW('sara.moussaoui@student.ma',    'fatima.bensalem@orientcompanion.ma', 'COMPLETED',  '2026-02-12 11:00:00', '2026-02-01 08:00:00'),
-    ROW('sara.moussaoui@student.ma',    'fatima.bensalem@orientcompanion.ma', 'SCHEDULED',  '2026-10-20 10:00:00', '2026-09-12 08:00:00'),
-    ROW('tariq.ouazzani@student.ma',    'mehdi.chaoui@orientcompanion.ma',    'COMPLETED',  '2026-02-20 09:00:00', '2026-02-10 07:30:00'),
-    ROW('tariq.ouazzani@student.ma',    'mehdi.chaoui@orientcompanion.ma',    'SCHEDULED',  '2026-10-22 11:00:00', '2026-09-14 09:00:00'),
-    ROW('hind.alaoui@student.ma',       'nadia.errachidi@orientcompanion.ma', 'COMPLETED',  '2026-03-01 14:00:00', '2026-02-18 10:00:00'),
-    ROW('hind.alaoui@student.ma',       'nadia.errachidi@orientcompanion.ma', 'REQUESTED',  NULL,                  '2026-09-15 09:00:00'),
-    ROW('rachid.benkirane@student.ma',  'omar.haddad@orientcompanion.ma',     'COMPLETED',  '2026-03-05 10:00:00', '2026-02-22 08:00:00'),
-    ROW('rachid.benkirane@student.ma',  'youssef.amrani@orientcompanion.ma',  'SCHEDULED',  '2026-10-18 10:00:00', '2026-09-08 09:00:00'),
-    ROW('layla.tahiri@student.ma',      'salma.guerraoui@orientcompanion.ma', 'COMPLETED',  '2026-03-08 15:00:00', '2026-02-25 09:00:00'),
-    ROW('layla.tahiri@student.ma',      'salma.guerraoui@orientcompanion.ma', 'REQUESTED',  NULL,                  '2026-09-16 10:00:00'),
-    ROW('yassine.zouiten@student.ma',   'karim.fassi@orientcompanion.ma',     'COMPLETED',  '2026-03-12 09:00:00', '2026-03-02 08:00:00'),
-    ROW('yassine.zouiten@student.ma',   'karim.fassi@orientcompanion.ma',     'SCHEDULED',  '2026-10-25 14:00:00', '2026-09-17 08:30:00'),
-    ROW('nour.el.houda@student.ma',     'zineb.idrissi@orientcompanion.ma',   'COMPLETED',  '2026-03-15 11:00:00', '2026-03-05 09:00:00'),
-    ROW('nour.el.houda@student.ma',     'zineb.idrissi@orientcompanion.ma',   'REQUESTED',  NULL,                  '2026-09-17 11:00:00'),
-    ROW('imad.berrada@student.ma',      'youssef.amrani@orientcompanion.ma',  'COMPLETED',  '2026-04-01 10:00:00', '2026-03-20 09:00:00'),
-    ROW('sofia.nadifi@student.ma',      'salma.guerraoui@orientcompanion.ma', 'REQUESTED',  NULL,                  '2026-09-18 08:00:00'),
-    ROW('kamal.rhazi@student.ma',       'omar.haddad@orientcompanion.ma',     'COMPLETED',  '2026-04-10 09:00:00', '2026-04-01 08:00:00'),
-    ROW('kamal.rhazi@student.ma',       'karim.fassi@orientcompanion.ma',     'SCHEDULED',  '2026-10-28 10:00:00', '2026-09-15 09:00:00'),
-    ROW('meryem.skali@student.ma',      'fatima.bensalem@orientcompanion.ma', 'COMPLETED',  '2026-04-15 14:00:00', '2026-04-05 08:30:00'),
-    ROW('meryem.skali@student.ma',      'fatima.bensalem@orientcompanion.ma', 'REQUESTED',  NULL,                  '2026-09-18 10:00:00'),
-    ROW('hamza.tazi@student.ma',        'omar.haddad@orientcompanion.ma',     'SCHEDULED',  '2026-10-30 11:00:00', '2026-09-16 10:00:00'),
-    ROW('dounia.bakkali@student.ma',    'zineb.idrissi@orientcompanion.ma',   'REQUESTED',  NULL,                  '2026-09-17 12:00:00'),
-    ROW('bilal.kettani@student.ma',     'salma.guerraoui@orientcompanion.ma', 'COMPLETED',  '2026-05-05 10:00:00', '2026-04-25 09:00:00'),
-    ROW('bilal.kettani@student.ma',     'salma.guerraoui@orientcompanion.ma', 'SCHEDULED',  '2026-11-02 09:00:00', '2026-09-18 08:00:00'),
-    ROW('rim.el.mansouri@student.ma',   'fatima.bensalem@orientcompanion.ma', 'COMPLETED',  '2026-05-10 11:00:00', '2026-04-30 10:00:00'),
-    ROW('adil.sabiri@student.ma',       'youssef.amrani@orientcompanion.ma',  'REQUESTED',  NULL,                  '2026-09-18 11:00:00'),
-    ROW('oussama.el.yazghi@student.ma', 'mehdi.chaoui@orientcompanion.ma',    'COMPLETED',  '2026-05-20 14:00:00', '2026-05-10 09:00:00'),
-    ROW('oussama.el.yazghi@student.ma', 'mehdi.chaoui@orientcompanion.ma',    'SCHEDULED',  '2026-11-05 10:00:00', '2026-09-18 12:00:00')
-) AS ms(student_email, counselor_email, status, scheduled_at, created_at)
+    SELECT 'amine.benali@student.ma' AS student_email, 'youssef.amrani@orientcompanion.ma' AS counselor_email, 'COMPLETED' AS status, '2026-02-05 10:00:00' AS scheduled_at, '2026-01-25 08:00:00' AS created_at
+    UNION ALL SELECT 'amine.benali@student.ma',      'karim.fassi@orientcompanion.ma',     'COMPLETED',  '2026-03-10 14:00:00', '2026-03-01 09:00:00'
+    UNION ALL SELECT 'amine.benali@student.ma',      'youssef.amrani@orientcompanion.ma',  'SCHEDULED',  '2026-10-15 09:00:00', '2026-09-10 10:00:00'
+    UNION ALL SELECT 'sara.moussaoui@student.ma',    'fatima.bensalem@orientcompanion.ma', 'COMPLETED',  '2026-02-12 11:00:00', '2026-02-01 08:00:00'
+    UNION ALL SELECT 'sara.moussaoui@student.ma',    'fatima.bensalem@orientcompanion.ma', 'SCHEDULED',  '2026-10-20 10:00:00', '2026-09-12 08:00:00'
+    UNION ALL SELECT 'tariq.ouazzani@student.ma',    'mehdi.chaoui@orientcompanion.ma',    'COMPLETED',  '2026-02-20 09:00:00', '2026-02-10 07:30:00'
+    UNION ALL SELECT 'tariq.ouazzani@student.ma',    'mehdi.chaoui@orientcompanion.ma',    'SCHEDULED',  '2026-10-22 11:00:00', '2026-09-14 09:00:00'
+    UNION ALL SELECT 'hind.alaoui@student.ma',       'nadia.errachidi@orientcompanion.ma', 'COMPLETED',  '2026-03-01 14:00:00', '2026-02-18 10:00:00'
+    UNION ALL SELECT 'hind.alaoui@student.ma',       'nadia.errachidi@orientcompanion.ma', 'REQUESTED',  NULL,                  '2026-09-15 09:00:00'
+    UNION ALL SELECT 'rachid.benkirane@student.ma',  'omar.haddad@orientcompanion.ma',     'COMPLETED',  '2026-03-05 10:00:00', '2026-02-22 08:00:00'
+    UNION ALL SELECT 'rachid.benkirane@student.ma',  'youssef.amrani@orientcompanion.ma',  'SCHEDULED',  '2026-10-18 10:00:00', '2026-09-08 09:00:00'
+    UNION ALL SELECT 'layla.tahiri@student.ma',      'salma.guerraoui@orientcompanion.ma', 'COMPLETED',  '2026-03-08 15:00:00', '2026-02-25 09:00:00'
+    UNION ALL SELECT 'layla.tahiri@student.ma',      'salma.guerraoui@orientcompanion.ma', 'REQUESTED',  NULL,                  '2026-09-16 10:00:00'
+    UNION ALL SELECT 'yassine.zouiten@student.ma',   'karim.fassi@orientcompanion.ma',     'COMPLETED',  '2026-03-12 09:00:00', '2026-03-02 08:00:00'
+    UNION ALL SELECT 'yassine.zouiten@student.ma',   'karim.fassi@orientcompanion.ma',     'SCHEDULED',  '2026-10-25 14:00:00', '2026-09-17 08:30:00'
+    UNION ALL SELECT 'nour.el.houda@student.ma',     'zineb.idrissi@orientcompanion.ma',   'COMPLETED',  '2026-03-15 11:00:00', '2026-03-05 09:00:00'
+    UNION ALL SELECT 'nour.el.houda@student.ma',     'zineb.idrissi@orientcompanion.ma',   'REQUESTED',  NULL,                  '2026-09-17 11:00:00'
+    UNION ALL SELECT 'imad.berrada@student.ma',      'youssef.amrani@orientcompanion.ma',  'COMPLETED',  '2026-04-01 10:00:00', '2026-03-20 09:00:00'
+    UNION ALL SELECT 'sofia.nadifi@student.ma',      'salma.guerraoui@orientcompanion.ma', 'REQUESTED',  NULL,                  '2026-09-18 08:00:00'
+    UNION ALL SELECT 'kamal.rhazi@student.ma',       'omar.haddad@orientcompanion.ma',     'COMPLETED',  '2026-04-10 09:00:00', '2026-04-01 08:00:00'
+    UNION ALL SELECT 'kamal.rhazi@student.ma',       'karim.fassi@orientcompanion.ma',     'SCHEDULED',  '2026-10-28 10:00:00', '2026-09-15 09:00:00'
+    UNION ALL SELECT 'meryem.skali@student.ma',      'fatima.bensalem@orientcompanion.ma', 'COMPLETED',  '2026-04-15 14:00:00', '2026-04-05 08:30:00'
+    UNION ALL SELECT 'meryem.skali@student.ma',      'fatima.bensalem@orientcompanion.ma', 'REQUESTED',  NULL,                  '2026-09-18 10:00:00'
+    UNION ALL SELECT 'hamza.tazi@student.ma',        'omar.haddad@orientcompanion.ma',     'SCHEDULED',  '2026-10-30 11:00:00', '2026-09-16 10:00:00'
+    UNION ALL SELECT 'dounia.bakkali@student.ma',    'zineb.idrissi@orientcompanion.ma',   'REQUESTED',  NULL,                  '2026-09-17 12:00:00'
+    UNION ALL SELECT 'bilal.kettani@student.ma',     'salma.guerraoui@orientcompanion.ma', 'COMPLETED',  '2026-05-05 10:00:00', '2026-04-25 09:00:00'
+    UNION ALL SELECT 'bilal.kettani@student.ma',     'salma.guerraoui@orientcompanion.ma', 'SCHEDULED',  '2026-11-02 09:00:00', '2026-09-18 08:00:00'
+    UNION ALL SELECT 'rim.el.mansouri@student.ma',   'fatima.bensalem@orientcompanion.ma', 'COMPLETED',  '2026-05-10 11:00:00', '2026-04-30 10:00:00'
+    UNION ALL SELECT 'adil.sabiri@student.ma',       'youssef.amrani@orientcompanion.ma',  'REQUESTED',  NULL,                  '2026-09-18 11:00:00'
+    UNION ALL SELECT 'oussama.el.yazghi@student.ma', 'mehdi.chaoui@orientcompanion.ma',    'COMPLETED',  '2026-05-20 14:00:00', '2026-05-10 09:00:00'
+    UNION ALL SELECT 'oussama.el.yazghi@student.ma', 'mehdi.chaoui@orientcompanion.ma',    'SCHEDULED',  '2026-11-05 10:00:00', '2026-09-18 12:00:00'
+) AS ms
 JOIN users s ON s.email = ms.student_email
 JOIN users c ON c.email = ms.counselor_email;
